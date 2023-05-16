@@ -224,7 +224,15 @@ def main():
 
     data = {}
     switches_filedata = get_switches_from_file()
-
+    #cursorObj.execute("SELECT * FROM lldpRemPortId WHERE LocSysName = ? AND RemSysName = ? AND id = ?", (LocSysName, RemSysName, id))
+    #if not cursorObj.fetchone():
+    #    cursorObj.execute("INSERT INTO lldpRemPortId (LocSysName, RemSysName, id, ...) VALUES (?, ?, ?, ...)", (locSysName, remSysName, rPortId, ...))
+    #    connection.commit()
+    #    print('44444444444444444444444444444444444444444444444444444444444444444444.')
+    #else:
+    #    print(f'Skipped duplicated row in lldpRemPortId: {locSysName}, {remSysName}, {rPortId}')
+    #    #
+    #    print(" - Reading device lldpRemPortId table...", file=sys.stderr)
     for switch in switches_filedata:
         community = switch.get('community')
         snmp_port = switch.get('snmp_port')
@@ -242,13 +250,13 @@ def main():
             con.commit()
 
         cursorObj.execute('SELECT * FROM lldpLocSysName')
-
+        
         rows = cursorObj.fetchall()
 
         for row in rows:
             print(row)
 
-        print(" - Reading device lldpLocPortId  table...", file=sys.stderr)
+        print("1111111111111111111111111111 - Reading device lldpLocPortId  table...", file=sys.stderr)
         lldpLocPortId = snmp_walk(ip, '1.0.8802.1.1.2.1.3.7.1.3', 'str', community=community)
         #for id, LocPortId in lldpLocPortId.items():
         for id, LocPortId_hex in lldpLocPortId.items():
@@ -282,8 +290,9 @@ def main():
                 "INSERT INTO lldpRemPortId VALUES('" + gLocSysName + "','" + RemSysName + "','" + read_id_from_oid_tail(
                     id, with_len=False) + "','')")
             con.commit()
+            
+            # 检查记录是否已经存在
 
-            print(" - Reading device lldpRemPortId table...", file=sys.stderr)
             lldpRemPortId = snmp_walk(ip, '1.0.8802.1.1.2.1.4.1.1.7', 'any', community=community)
             for id, RemPortId_hex in lldpRemPortId.items():
                 if RemPortId_hex.startswith('Hex-STRING:'):
