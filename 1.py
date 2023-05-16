@@ -286,9 +286,18 @@ def main():
         for id, RemSysName in lldpRemSysName.items():
             print('id=', read_id_from_oid_tail(id, with_len=False))
             print('RemSysName=', RemSysName)
-            cursorObj.execute(
-                "INSERT INTO lldpRemPortId VALUES('" + gLocSysName + "','" + RemSysName + "','" + read_id_from_oid_tail(
-                    id, with_len=False) + "','')")
+            #cursorObj.execute(
+            #    "INSERT INTO lldpRemPortId VALUES('" + gLocSysName + "','" + RemSysName + "','" + read_id_from_oid_tail(
+            #        id, with_len=False) + "','')")
+            cursorObj.execute("SELECT * FROM lldpRemPortId WHERE LocSysName=? AND RemSysName=? AND id=?",
+                  (LocSysName, RemSysName, read_id_from_oid_tail(id, with_len=False)))
+            existing_record = cursorObj.fetchone()
+            if existing_record:
+                cursorObj.execute("UPDATE lldpRemPortId SET some_column=? WHERE gLocSysName=? AND RemSysName=? AND id=?",
+                                  (some_value, LocSysName, RemSysName, read_id_from_oid_tail(id, with_len=False)))
+            else:
+                cursorObj.execute(
+                    "INSERT INTO lldpRemPortId VALUES('" + LocSysName + "','" + RemSysName + "','" + read_id_from_oid_tail(id, with_len=False) + "','')")
             con.commit()
             
             # 检查记录是否已经存在
